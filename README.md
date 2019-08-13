@@ -12,7 +12,7 @@ Une API construite avec Netlify est restreint par quelques contraintes :
 <ul>
 <li> L'API permet uniquement de consulter les données, impossible de les modifier ou les supprimer.
 <li> Le nombre de fichiers composant les jeux de données ne doit pas être trop grand. (Quelques centaines au maximum)
-<li> L'API doit respecter les [conditions d'utilisation de Netlify](https://www.netlify.com/tos/). Les quotas pour des comptes gratuits: 100GB/ mois de bande passante et 100GB de stockage.
+<li> L'API doit respecter les conditions d'utilisation de Netlify :https://www.netlify.com/tos/ . Les quotas pour des comptes gratuits: 100GB/ mois de bande passante et 100GB de stockage.
 </ul>
 
 ### 2. Mise en place
