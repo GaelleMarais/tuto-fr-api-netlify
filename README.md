@@ -77,7 +77,7 @@ Nous sommes prêts à héberger notre API.
 
 Sur la page d’accueil de [Netlify](https://www.netlify.com/), il faut se connecter avec son compte Github puis cliquer sur “create a new site from GitHub” et accepter les autorisations demandées par Netlify.
 
-On choisi ensuite le dépôt où sont stockées nos données :
+On choisi ensuite le dépôt  :
 
 ![Capture d’écran de 2019-08-13 11-34-44](https://user-images.githubusercontent.com/14167172/62934329-9276a700-bdc4-11e9-9914-6008ee4d144c.png)
 
