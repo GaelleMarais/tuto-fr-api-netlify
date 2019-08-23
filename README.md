@@ -4,18 +4,64 @@
 
 
 ### Netlify
-[Netlify](https://www.netlify.com/) est un outil qui propose des services d'hébergement web pour des sites web statiques, par exemple à partir de dépôts Github.
-Dans ce tutoriel nous allons l'utiliser pour créer une API Rest à partir de données d'un dépôt Github.
+[Netlify](https://www.netlify.com/) est un outil qui propose des services d'hébergement web pour des sites web statiques, par exemple à partir de dépôts GitHub.
+Dans ce tutoriel nous allons apprendre à mettre en place un site web à partir d'un dépôt GitHub, et ensuite on expliquera en détail comment s'en servir en tant qu'API pour servir des fichiers `.json` .
+
 
 ### 1. Contraintes
-Une API construite avec Netlify est restreint par quelques contraintes :
+Une API construite avec Netlify est restreinte par quelques contraintes :
 <ul>
 <li> L'API permet uniquement de consulter les données, impossible de les modifier ou les supprimer.
 <li> Le nombre de fichiers composant les jeux de données ne doit pas être trop grand. (Quelques centaines au maximum)
 <li> L'API doit respecter les conditions d'utilisation de Netlify :https://www.netlify.com/tos/ . Les quotas pour des comptes gratuits: 100GB/ mois de bande passante et 100GB de stockage.
 </ul>
 
-### 2. Mise en place
+### 2. Mise en place de notre site web
+
+Sur la page d’accueil de [Netlify](https://www.netlify.com/), il faut se connecter avec son compte Github puis cliquer sur “create a new site from GitHub” et accepter les autorisations demandées par Netlify.
+
+On choisit ensuite le dépôt  :
+
+![Capture d’écran de 2019-08-13 11-34-44](https://user-images.githubusercontent.com/14167172/62934329-9276a700-bdc4-11e9-9914-6008ee4d144c.png)
+
+Et on configure la construction de notre application web :
+
+![Capture d’écran de 2019-08-13 14-03-45](https://user-images.githubusercontent.com/14167172/62940164-44b56b00-bdd3-11e9-8dd0-558f13dd311d.png)
+
+*( Remarque: Voir la partie 5 du tutoriel pour la case Build Command )*
+
+Par défaut, Netlify recherche un fichier `index.html` pour en faire la page d'accueil de notre site web. Si ce fichier n'existe pas, alors la page affichera une erreur.
+
+### 3. Redirections
+
+Dans notre exemple, on ne veut pas créer de page `index.html` mais par exemple vers en sorte que le lien de notre site web redirige directement vers le dépôt GitHub.
+Pour ce faire, on crée un fichier `_redirects` à la racine du dépôt :
+```
+/ https://github.com/GaelleMarais/tuto-fr-api-netlify 301
+```
+
+La syntaxe est la suivante :
+```
+chemin_originel chemin_vers_lequel_rediriger code_HTTP
+```
+
+Le code HTTP `301` indique qu'il s'agit d'une redirection permanente. Voir [la documentation](https://www.netlify.com/docs/redirects/) pour plus de détails.
+
+
+### 4. Personnalisation
+
+Par défaut, Netlify donne un nom à notre site web, que l'on peut modifier comme suit :
+
+![Capture d’écran de 2019-08-13 12-09-59](https://user-images.githubusercontent.com/14167172/62934536-1597fd00-bdc5-11e9-918b-a44fe1e8565e.png)
+
+![Capture d’écran de 2019-08-13 12-10-18](https://user-images.githubusercontent.com/14167172/62934540-1761c080-bdc5-11e9-9ff6-ed594c06795a.png)
+
+Notre application web est prête ! On peut la consulter à l'adresse https://tuto-fr-api-netlify.netlify.com.
+
+Pour l'instant, elle ne sert pas à grand chose, et nous allons voir comment s'en servir d'une API.
+
+
+### 5. Création des fichiers JSON
 
 Pour notre exemple, nous utilisons [les dates de jours fériés en France](https://www.data.gouv.fr/fr/datasets/jours-feries-en-france/).
 
@@ -33,6 +79,7 @@ from datetime import datetime
 from io import StringIO
 from urllib.request import urlopen
 
+# Définition des URLs où récupérer les données
 DATA_GOUV = 'https://www.data.gouv.fr/fr/datasets/r/'
 
 modes = [
@@ -40,22 +87,24 @@ modes = [
     ('data/alsace-moselle/', DATA_GOUV + '944504ac-2592-4503-acd9-6befe8942ae2'),
 ]
 
+# Opérations à faire sur chaque URL
 for mode in modes:
     base_path, url = mode
-    os.makedirs(base_path, exist_ok=True)
+    os.makedirs(base_path, exist_ok=True)  # Création du dossier où stocker les fichiers .json
 
-    response = urlopen(url).read().decode('utf-8')
-    reader = csv.DictReader(StringIO(response))
+    response = urlopen(url).read().decode('utf-8') # Ouverture de l'URL qui contient le csv
+    reader = csv.DictReader(StringIO(response)) # Ouverture du fichier .csv obtenu
 
-    data_by_year = defaultdict(list)
+    data_by_year = defaultdict(list)  # Création d'une liste vide
     for row in reader:
-        year = int(row['date'][0:4])
+        year = int(row['date'][0:4]) # Lecture de la date
         del row['est_jour_ferie']
-        data_by_year[year].append(row)
+        data_by_year[year].append(row) # Ajout de la donnée dans la liste
 
     if max(data_by_year.keys()) < datetime.today().year + 15:
         raise ValueError('We should have bank holidays for 15 years')
 
+    # Création d'un fichier pour chaque année
     for year in data_by_year:
         filename = base_path + str(year) + '.json'
         with open(filename, 'w') as f:
@@ -63,42 +112,17 @@ for mode in modes:
 
 ```
 
+Maintenant nous allons ajouter les pages de requêtes dans notre fichier `_redirects` pour les envoyer directement sur le fichier JSON :
 
-Enfin, nous allons créer un fichier `_redirects` qui va rediriger les pages de requêtes directement sur le résultat JSON, et configurer la page d'accueil comme la page du dépôt.
 ```
 / https://github.com/GaelleMarais/tuto-fr-api-netlify 301
 /api/alsace-moselle/:year /data/alsace-moselle/:year.json 200
 /api/:year /data/:year.json 200
 ```
 
-### 3. Déploiement avec netlify
-
-Nous sommes prêts à héberger notre API.
-
-Sur la page d’accueil de [Netlify](https://www.netlify.com/), il faut se connecter avec son compte Github puis cliquer sur “create a new site from GitHub” et accepter les autorisations demandées par Netlify.
-
-On choisi ensuite le dépôt  :
-
-![Capture d’écran de 2019-08-13 11-34-44](https://user-images.githubusercontent.com/14167172/62934329-9276a700-bdc4-11e9-9914-6008ee4d144c.png)
-
-Et on configure la construction de notre application web :
-
-![Capture d’écran de 2019-08-13 14-03-45](https://user-images.githubusercontent.com/14167172/62940164-44b56b00-bdd3-11e9-8dd0-558f13dd311d.png)
-
-### 4. Personnalisation
-
-Par défaut, Netlify donne un nom à notre site web, que l'on peut modifier comme suit :
-
-![Capture d’écran de 2019-08-13 12-09-59](https://user-images.githubusercontent.com/14167172/62934536-1597fd00-bdc5-11e9-918b-a44fe1e8565e.png)
-
-![Capture d’écran de 2019-08-13 12-10-18](https://user-images.githubusercontent.com/14167172/62934540-1761c080-bdc5-11e9-9ff6-ed594c06795a.png)
-
-Et voilà !
-Nous avons créé une API très basique pour consulter des données au format JSON.
-
 ### 5. Exemple
 
-La requete https://tuto-fr-api-netlify.netlify.com/api/2019 renvoie vers la page :
+La requête https://tuto-fr-api-netlify.netlify.com/api/2019 renvoie vers la page :
 
 
 ![Capture d’écran de 2019-08-13 14-09-42](https://user-images.githubusercontent.com/14167172/62940558-24d27700-bdd4-11e9-94fa-c821b2be227c.png)
