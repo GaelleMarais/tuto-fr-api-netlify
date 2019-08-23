@@ -34,7 +34,7 @@ Par défaut, Netlify recherche un fichier `index.html` pour en faire la page d'a
 
 ### 3. Redirections
 
-Dans notre exemple, on ne veut pas créer de page `index.html` mais par exemple vers en sorte que le lien de notre site web redirige directement vers le dépôt GitHub.
+Dans notre exemple, on ne veut pas créer de page `index.html` mais par exemple faire en sorte que le lien de notre site web redirige directement vers le dépôt GitHub.
 Pour ce faire, on crée un fichier `_redirects` à la racine du dépôt :
 ```
 / https://github.com/GaelleMarais/tuto-fr-api-netlify 301
