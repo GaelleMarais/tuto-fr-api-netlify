@@ -5,7 +5,9 @@
 
 ### Netlify
 [Netlify](https://www.netlify.com/) est un outil qui propose des services d'hébergement web pour des sites web statiques, par exemple à partir de dépôts GitHub.
-Dans ce tutoriel nous allons apprendre à mettre en place un site web à partir d'un dépôt GitHub, et ensuite on expliquera en détail comment s'en servir en tant qu'API pour servir des fichiers `.json` .
+Dans ce tutoriel nous allons apprendre à mettre en place un site web à partir d'un dépôt GitHub, et ensuite on expliquera en détail comment s'en servir en tant qu'API pour servir des fichiers JSON.
+
+Dans ce tutoriel, nous allons d'abord expliquer comment créer une application web reliée directement à un dépôt GitHub, et en particulier nous allons voir comment l'utiliser pour servir des fichiers JSON que l'on aura déjà généré.
 
 
 ### 1. Contraintes
@@ -126,6 +128,11 @@ La requête https://tuto-fr-api-netlify.netlify.com/api/2019 renvoie vers la pag
 
 
 ![Capture d’écran de 2019-08-13 14-09-42](https://user-images.githubusercontent.com/14167172/62940558-24d27700-bdd4-11e9-94fa-c821b2be227c.png)
+
+### Conclusion
+
+Netlify permet très facilement et rapidement de mettre en place un serveur pouvant mettre à disponibilité des fichiers JSON. Les fichiers JSON doivent cependant être générés au préalable et il est rare de penser à tous les cas de ré-utilisation de données, et donc de penser à tous les fichiers JSON qu'il est intéressant d'avoir.
+Pour créer des APIs qui ne rencontrent pas ce problème, on peut s'intéresser à [Datasette](https://github.com/GaelleMarais/tuto-fr-datasette) ou [API Platform](https://github.com/GaelleMarais/tuto-fr-apiplatform).
 
 
 
